@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "toolkit"
+version = "0.1.0"
+requires-python = ">= 3.10"
+description = "Lab01: Calculator and Converter Utility"
+readme = "README.md"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
