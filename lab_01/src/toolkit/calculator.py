@@ -125,14 +125,14 @@ class Validator:
                     if token.is_opening:
                         brace_cnt += 1
                     else:
-                        if isinstance(tokens[i - 1], OperatorToken) or tokens[i - 1] == BraceToken(True):
-                            raise ExpressionSyntaxError(
-                                "Empty braces were found."
-                            )
                         brace_cnt -= 1
                         if brace_cnt < 0:
                             raise ExpressionSyntaxError(
                                 "Braces do not match."
+                            )
+                        if isinstance(tokens[i - 1], OperatorToken) or tokens[i - 1] == BraceToken(True):
+                            raise ExpressionSyntaxError(
+                                "Empty braces were found."
                             )
 
         if brace_cnt != 0:
@@ -202,3 +202,11 @@ class Calculator:
 
     def calculate_expression(self, tokens: list) -> int | float:
         return self.calculate_prn(self.tokens_to_prn(tokens))
+
+def calculate(expression: str) -> int | float:
+    tokenizer = Tokenizer()
+    validator = Validator()
+    calculator = Calculator()
+    tokens = tokenizer.tokenize(expression)
+    validator.validate(tokens)
+    return calculator.calculate_expression(tokens)

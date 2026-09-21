@@ -1,13 +1,13 @@
-from toolkit.calculator import Tokenizer, Validator, Calculator
+import sys
+import argparse
 
-def calculate(expression: str) -> int | float:
-    tokenizer = Tokenizer()
-    validator = Validator()
-    calculator = Calculator()
-    return 0
+from toolkit.calculator import calculate
 
 def main():
-    pass
-
+    parser = argparse.ArgumentParser(
+        prog = "toolkit",
+        description = "CLI Toolkit: Calculator and Converter"
+    )
+    subcommands = parser.add_subparsers(dest = "command", required = True)
 if __name__ == "__main__":
     main()
