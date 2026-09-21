@@ -13,7 +13,7 @@ class InvalidCharacterError(CalculatorError):
 class ExpressionSyntaxError(CalculatorError):
     pass
 
-class DivisionByZeroError():
+class DivisionByZeroError(CalculatorError):
     pass
 
 class ConverterError(ToolkitError):

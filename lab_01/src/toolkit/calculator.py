@@ -19,31 +19,37 @@ class OperatorToken(Token):
 class BraceToken(Token):
     is_opening: bool
 
-def token_get_type(token):
-        if token in ("+", "-", "*", "/"): return "Operator"
-        if token.isdigit() or token in (".", ","): return "Operand"
-        if token in ("(", ")"): return "Brace"
-        return "Unknown"
+def get_type(token: str) -> str:
+    if token in ("+", "-", "*", "/") or type(token) == OperatorToken: return "Operator"
+    if token.isdigit() or token in (".", ",") or type(token) == OperandToken: return "Operand"
+    if token in ("(", ")") or type(token) == BraceToken: return "Brace"
+    return "Unknown"
 
-class Tokenizator:
+def check_priority(token) -> int:
+    match token:
+        case "+" | "-": return 1
+        case "*" | "/": return 2
+    return 0
 
-    def tokenize(expression):
+class Tokenizer:
+
+    def tokenize(self, expression):
         expression = "".join(expression.split())
-        result: list[Token] = []
-        
+        result: list = []
+
         for token in expression:
-            match token_get_type(token):
+            match get_type(token):
                 case "Operator":
                     if result:
-                        match token_get_type(result[-1]):
-                            case "Operand" | "Brace":
+                        match get_type(result[-1]):
+                            case "Operand":
                                 result.append(OperatorToken(token, True))
-                            case "Operato":
+                            case "Operator" | "Brace":
                                 result.append(OperatorToken(token, False))
                     else:
                         result.append(OperatorToken(token, False))
                 case "Operand":
-                    if result and token_get_type(token) == "Operand":
+                    if result and get_type(result[-1]) == "Operand":
                         result[-1].value += token
                     else:
                         result.append(OperandToken(token, False))
@@ -54,10 +60,10 @@ class Tokenizator:
                         f"Unknown character: {token}."
                     )
         return result
-    
+
 class Validator:
 
-    def validate(tokens):
+    def validate(self, tokens: list):
         if not tokens:
             raise EmptyExpressionError(
                 "Given expression is empty."
@@ -65,7 +71,7 @@ class Validator:
         brace_cnt: int = 0
         for i in range(len(tokens)):
             token = tokens[i]
-            match token_get_type(token):
+            match get_type(token):
                 case "Operator":
                     if not token.is_binary:
                         if token in ("*", "/"):
@@ -74,7 +80,7 @@ class Validator:
                             )
                         else:
                             if i != len(tokens) - 1:
-                                if (token_get_type(tokens[i+1]) == "Operator"):
+                                if (get_type(tokens[i+1]) == "Operator"):
                                     raise ExpressionSyntaxError(
                                         "Two binary operators in a row."
                                     )
@@ -82,15 +88,9 @@ class Validator:
                                 raise ExpressionSyntaxError(
                                     "No second operand for binary operator."
                                 )
-                    else:
-                        pass
-                    
                 case "Operand":
                     try:
-                        if token.is_float:
-                            tmp: float = float(token)
-                        else:
-                            tmp: int = int(token)
+                        tmp: float = float(token) + int(token)
                     except ValueError:
                         raise ExpressionSyntaxError(
                             "Invalid format of number."
@@ -104,6 +104,68 @@ class Validator:
                             raise ExpressionSyntaxError(
                                 "Braces do not match."
                             )
-                        
+
 class Calculator:
-    pass
+
+    def perform_operation(self, operator: OperatorToken, first_operand: int | float, second_operand: int | float) -> int | float:
+        match operator.value:
+            case "*": return first_operand * second_operand
+            case "+": return first_operand + second_operand
+            case "-": return first_operand - second_operand
+            case "/":
+                if second_operand:
+                    if type(first_operand) == int and type(second_operand) == int:
+                        return first_operand // second_operand
+                    else:
+                        return first_operand / second_operand
+                else:
+                    raise DivisionByZeroError(
+                        "Division by zero is in given firmula"
+                    )
+        return -1
+
+    def tokens_to_prn(self, tokens: list) -> list:
+        result: list = []
+        stack: list = []
+        for token in tokens:
+            match get_type(token):
+                case "Operand":
+                    result.append(token)
+                case "Operator":
+                    while stack and get_type(stack[-1]) == "Operator" and \
+                    check_priority(stack[-1]) > check_priority(token) or \
+                    token.is_binary and check_priority(stack[-1]) == check_priority(token):
+                        result.append(stack.pop())
+                    stack.append(token)
+                case "Brace":
+                    if token.is_opening:
+                        stack.append(token)
+                    else:
+                        while stack and stack[-1] != BraceToken(False):
+                            result.append(stack.pop())
+                        if stack and stack[-1] == BraceToken(False):
+                            stack.pop()
+        while stack:
+            result.append(stack.pop())
+
+        return result[::-1]
+
+    def calculate_prn(self, formula: list) -> int | float:
+        stack: list = []
+        for token in formula:
+            if get_type(token) == "Operand":
+                stack.append(float(token.value) if token.is_float else int(token.value))
+            else:
+                if token.is_binary:
+                    second_operand: int | float = stack.pop()
+                    first_operand: int | float = 0
+                    if token.is_binary:
+                        first_operand = stack.pop()
+                    stack.append(self.perform_operation(token, first_operand, second_operand))
+
+        if stack:
+            return stack.pop()
+        raise ExpressionSyntaxError("Something went wrong while calculating the expression.")
+
+    def calculate_expression(self, tokens: list) -> int | float:
+        return self.calculate_prn(self.tokens_to_prn(tokens))
