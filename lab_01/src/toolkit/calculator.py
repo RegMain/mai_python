@@ -75,7 +75,7 @@ class Tokenizer:
                     continue
                 case "Unknown":
                     raise InvalidCharacterError(
-                        f"Unknown character: {token}."
+                        f"Unknown character: {token}.\n"
                     )
         return result
 
@@ -84,7 +84,7 @@ class Validator:
     def validate(self, tokens: list):
         if not tokens:
             raise EmptyExpressionError(
-                "Given expression is empty."
+                "Given expression is empty.\n"
             )
         brace_cnt: int = 0
         for i in range(len(tokens)):
@@ -93,33 +93,31 @@ class Validator:
                 case OperatorToken():
                     if i == len(tokens) - 1:
                         raise ExpressionSyntaxError(
-                            "No operand for operator."
+                            "No operand for operator.\n"
                         )
 
                     if not token.is_binary:
                         if token.value in ("*", "/"):
                             raise ExpressionSyntaxError(
-                                "Two binary operators in a row."
+                                "Two binary operators in a row.\n"
                             )
                     else:
                         if (isinstance(tokens[i + 1], OperatorToken) and tokens[i + 1].is_binary):
                             raise ExpressionSyntaxError(
-                                "Two binary operators in a row."
+                                "Two binary operators in a row.\n"
                             )
                         elif tokens[i + 1] == BraceToken(False):
                             raise ExpressionSyntaxError(
-                                "No second operand for binary operator."
+                                "No second operand for binary operator.\n"
                             )
                 case OperandToken():
-                    try:
-                        tmp: float = float(token.value)
-                    except ValueError:
+                    if token.is_float and token.value.count(".") > 1:
                         raise ExpressionSyntaxError(
-                            "Invalid format of number."
+                            "Invalid format of number.\n"
                         )
                     if i != 0 and isinstance(tokens[i - 1], OperandToken):
                         raise ExpressionSyntaxError(
-                            "No operator between two numbers."
+                            "No operator between two numbers.\n"
                         )
                 case BraceToken():
                     if token.is_opening:
@@ -128,16 +126,16 @@ class Validator:
                         brace_cnt -= 1
                         if brace_cnt < 0:
                             raise ExpressionSyntaxError(
-                                "Braces do not match."
+                                "Braces do not match.\n"
                             )
                         if isinstance(tokens[i - 1], OperatorToken) or tokens[i - 1] == BraceToken(True):
                             raise ExpressionSyntaxError(
-                                "Empty braces were found."
+                                "Empty braces were found.\n"
                             )
 
         if brace_cnt != 0:
             raise ExpressionSyntaxError(
-                "Braces do not match."
+                "Braces do not match.\n"
             )
 class Calculator:
 
@@ -154,7 +152,7 @@ class Calculator:
                         return first_operand / second_operand
                 else:
                     raise DivisionByZeroError(
-                        "Division by zero is in given firmula"
+                        "Division by zero is in given firmula.\n"
                     )
         return -1
 
@@ -198,7 +196,7 @@ class Calculator:
 
         if len(stack) == 1:
             return stack.pop()
-        raise ExpressionSyntaxError("Something went wrong while calculating the expression.")
+        raise ExpressionSyntaxError("Something went wrong while calculating the expression.\n")
 
     def calculate_expression(self, tokens: list) -> int | float:
         return self.calculate_prn(self.tokens_to_prn(tokens))
