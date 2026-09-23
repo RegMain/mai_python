@@ -22,7 +22,7 @@ class ConverterError(ToolkitError):
 class UnknownUnitError(ConverterError):
     pass
 
-class ImcompatibleUnitsError(ConverterError):
+class IncompatibleUnitsError(ConverterError):
     pass
 
 class InvalidValueError(ConverterError):

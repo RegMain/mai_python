@@ -1,6 +1,12 @@
 from dataclasses import dataclass
-from toolkit.errors import EmptyExpressionError, InvalidCharacterError
-from toolkit.errors import ExpressionSyntaxError, DivisionByZeroError
+
+from toolkit.errors import (
+    DivisionByZeroError,
+    EmptyExpressionError,
+    ExpressionSyntaxError,
+    InvalidCharacterError,
+)
+
 
 class Token:
     pass
@@ -139,7 +145,7 @@ class Validator:
             )
 class Calculator:
 
-    def perform_operation(self, operator: OperatorToken, first_operand: int | float, second_operand: int | float) -> int | float:
+    def perform_operation(self, operator: OperatorToken, first_operand: float, second_operand: float) -> int | float:
         match operator.value:
             case "*": return first_operand * second_operand
             case "+": return first_operand + second_operand

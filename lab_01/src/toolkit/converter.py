@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from toolkit.errors import ImcompatibleUnitsError, UnknownUnitError
-from toolkit.errors import InvalidValueError
+
+from toolkit.errors import IncompatibleUnitsError, InvalidValueError, UnknownUnitError
+
 
 @dataclass
 class Unit:
@@ -9,7 +10,7 @@ class Unit:
 
 @dataclass
 class LengthUnit(Unit):
-    
+
     def get_value_in_si(self) -> float:
         match self.unit:
             case "mm": return self.value / 1000
@@ -19,7 +20,7 @@ class LengthUnit(Unit):
             case _: raise UnknownUnitError(
                 f"Unknown how to convert from unit {self.unit} to m.\n"
             )
-            
+
     def get_value_in_unit(self, unit: str) -> float:
         value_in_si: float = self.get_value_in_si()
         match unit:
@@ -30,10 +31,10 @@ class LengthUnit(Unit):
             case _: raise UnknownUnitError(
                 f"Unknown how to convert unit to {unit}.\n"
             )
-            
+
 @dataclass
 class MassUnit(Unit):
-    
+
     def get_value_in_si(self) -> float:
         match self.unit:
             case "g": return self.value / 1000
@@ -41,7 +42,7 @@ class MassUnit(Unit):
             case _: raise UnknownUnitError(
                 f"Unknown how to convert from unit {self.unit} to kg.\n"
             )
-    
+
     def get_value_in_unit(self, unit: str) -> float:
         value_in_si: float = self.get_value_in_si()
         match unit:
@@ -53,7 +54,7 @@ class MassUnit(Unit):
 
 @dataclass
 class TemperatureUnit(Unit):
-    
+
     def get_value_in_si(self) -> float:
         match self.unit:
             case "k": return self.value - 273.15
@@ -86,7 +87,7 @@ class Converter:
             f"Type of {unit} is unknown.\n"
         )
 
-    def convert_from_to(self, from_unit: str, to_unit: str, value: string) -> float:
+    def convert_from_to(self, from_unit: str, to_unit: str, value: str) -> float:
         from_unit_type: str = self.get_type(from_unit)
         to_unit_type: str = self.get_type(to_unit)
 
@@ -96,12 +97,12 @@ class Converter:
             raise InvalidValueError(
                 "Given value is not a number.\n"
             )
-        
+
         if from_unit_type != to_unit_type:
-            raise ImcompatibleUnitsError(
+            raise IncompatibleUnitsError(
                 f"Type of --to={to_unit} unit is different from type of --from={from_unit} unit.\n"
             )
-        
+
         match from_unit_type:
             case "Length":
                 given_unit: LengthUnit = LengthUnit(from_unit, value)
@@ -114,10 +115,9 @@ class Converter:
                         "Temperature can't be below absolute zero (0 Kelvin).\n"
                     )
                 given_unit: TemperatureUnit = TemperatureUnit(from_unit, value)
-                
+
         return given_unit.get_value_in_unit(to_unit)
-        
+
 def convert(from_unit: str, to_unit: str, value: float) -> float:
     converter = Converter()
     return converter.convert_from_to(from_unit, to_unit, value)
-        
