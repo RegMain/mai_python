@@ -1,9 +1,10 @@
 import argparse
+import json
 import sys
 
 from toolkit.calculator import calculate
 from toolkit.converter import convert
-from toolkit.errors import ToolkitError
+from toolkit.errors import ToolkitError, ConverterError
 
 
 def main():
@@ -19,13 +20,41 @@ def main():
     parser_convert.add_argument("value", type=str)
     parser_convert.add_argument("--from_unit", type=str)
     parser_convert.add_argument("--to_unit", type=str)
+    parser_convert.add_argument("--config", type=str)
     args = parser.parse_args()
     try:
         match args.command:
             case "calc":
-                print(calculate(args.expression))
+                result = calculate(args.expression)
+                print(result)
+                result_json = {
+                    "expression": args.expression,
+                    "result": result
+                }
+                # Loading data from history.json
+                try:
+                    with open("history.json") as history_file:
+                        data = json.load(history_file)
+                        data["calculations"].append(result_json)
+                except FileNotFoundError:
+                    data = {
+                        "calculations":
+                            [result_json]
+                    }
+                # Saving data to history.json
+                with open("history.json", "w") as history_file:
+                    json.dump(data, history_file, indent=4)
             case "convert":
-                print(convert(args.from_unit.lower(), args.to_unit.lower(), args.value))
+                if args.config:
+                    config = args.config
+                else:
+                    config = ""
+                try:
+                    print(convert(args.from_unit.lower(), args.to_unit.lower(), args.value, config))
+                except FileNotFoundError:
+                    raise ConverterError(
+                        "Either there's no configuration file or path to it is wrong.\n"
+                    ) 
         sys.exit(0)
     except ToolkitError as exception:
         sys.stderr.write(f"Error: {exception}")

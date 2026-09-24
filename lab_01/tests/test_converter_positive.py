@@ -9,5 +9,5 @@ from toolkit.converter import convert
     ["k", "c", 0, -273.15],
     ["kg", "g", 0.3223, 0.3223*1000.0]
 ])
-def test_calculator_positive(from_unit: str, to_unit: str, value: float, expected_result: float):
-    assert convert(from_unit, to_unit, value) == expected_result
+def test_converter_positive(from_unit: str, to_unit: str, value: float, expected_result: float):
+    assert convert(from_unit, to_unit, value, "") == expected_result

@@ -1,10 +1,6 @@
 import pytest
 from toolkit.converter import convert
-from toolkit.errors import (
-    UnknownUnitError,
-    IncompatibleUnitsError,
-    InvalidValueError
-)
+from toolkit.errors import IncompatibleUnitsError, InvalidValueError, UnknownUnitError
 
 
 def test_unknown_unit_1():

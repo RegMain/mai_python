@@ -1,0 +1,50 @@
+{
+  "km": {
+    "type": "Distance",
+    "to_standart_expression": "x * 1000",
+    "from_standart_expression": "x / 1000"
+  },
+  "m": {
+    "type": "Distance",
+    "to_standart_expression": "x * 1",
+    "from_standart_expression": "x / 1"
+  },
+  "cm": {
+    "type": "Distance",
+    "to_standart_expression": "x / 100",
+    "from_standart_expression": "x * 100"
+  },
+  "mm": {
+    "type": "Distance",
+    "to_standart_expression": "x / 1000",
+    "from_standart_expression": "x * 1000"
+  },
+  "kg": {
+    "type": "Mass",
+    "to_standart_expression": "x * 1",
+    "from_standart_expression": "x / 1"
+  },
+  "g": {
+    "type": "Mass",
+    "to_standart_expression": "x / 1000",
+    "from_standart_expression": "x * 1000"
+  },
+  "k": {
+    "type": "Temperature",
+    "min_value": -273.15,
+    "to_standart_expression": "x - 273.15",
+    "from_standart_expression": "x + 273.15"
+  },
+  "f": {
+    "type": "Temperature",
+    "min_value": -273.15,
+    "to_standart_expression": "5 * (x - 32) / 9",
+    "from_standart_expression": "1.8 * x + 32"
+  },
+  "c": {
+    "type": "Temperature",
+    "min_value": -273.15,
+    "to_standart_expression": "x * 1",
+    "from_standart_expression": "x / 1"
+  }
+}

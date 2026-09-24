@@ -27,3 +27,6 @@ class IncompatibleUnitsError(ConverterError):
 
 class InvalidValueError(ConverterError):
     pass
+
+class ConfigSyntaxError(ConverterError):
+    pass
