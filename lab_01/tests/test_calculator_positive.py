@@ -3,6 +3,12 @@ from toolkit.calculator import calculate
 
 
 @pytest.mark.parametrize("expression, expected_result", [
+
+    # Required tests
+    ("2+3*4", 14),
+    ("10 / 4", 2.5),
+    ("-2 * -3", 6),
+    ("1+-2", -1),     
     # Operators' priority
     ("1+2*3/1", eval("1+2*3/1")),
     ("5*7-3/2+58%4-21+3*10", eval("5*7-3/2+58%4-21+3*10")),

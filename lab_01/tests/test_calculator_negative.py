@@ -7,6 +7,17 @@ from toolkit.errors import (
     InvalidCharacterError,
 )
 
+def test_required_1():
+    with pytest.raises(ExpressionSyntaxError):
+        calculate("2*/3")
+
+def test_required_2():
+    with pytest.raises(InvalidCharacterError):
+        calculate("2+a")
+
+def test_required_3():
+    with pytest.raises(DivisionByZeroError):
+        calculate("1/0")
 
 def test_empty_expression_1():
     with pytest.raises(EmptyExpressionError):
@@ -23,6 +34,18 @@ def test_invalid_expression_1():
 def test_invalid_expression_2():
     with pytest.raises(ExpressionSyntaxError):
         calculate("43*/5")
+
+def test_invalid_expression_3():
+    with pytest.raises(ExpressionSyntaxError):
+        calculate("(((3+3)))()")
+
+def test_invalid_expression_4():
+    with pytest.raises(ExpressionSyntaxError):
+        calculate(")(6*5)(")
+
+def test_invalid_expression_5():
+    with pytest.raises(ExpressionSyntaxError):
+        calculate("(3+1)+5)")
 
 def test_division_by_zero_1():
     with pytest.raises(DivisionByZeroError):

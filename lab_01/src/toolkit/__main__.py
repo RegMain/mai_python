@@ -50,7 +50,7 @@ def main():
                 else:
                     config = ""
                 try:
-                    print(convert(args.from_unit.lower(), args.to_unit.lower(), args.value, config))
+                    print(convert(args.from_unit, args.to_unit, args.value, config))
                 except FileNotFoundError:
                     raise ConverterError(
                         "Either there's no configuration file or path to it is wrong.\n"

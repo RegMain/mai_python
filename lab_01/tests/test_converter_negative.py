@@ -2,6 +2,13 @@ import pytest
 from toolkit.converter import convert
 from toolkit.errors import IncompatibleUnitsError, InvalidValueError, UnknownUnitError
 
+def test_required_1():
+    with pytest.raises(InvalidValueError):
+        convert("k", "c", -1)
+
+def test_required_2():
+    with pytest.raises(IncompatibleUnitsError):
+        convert("kg", "m", 1)
 
 def test_unknown_unit_1():
     with pytest.raises(UnknownUnitError):

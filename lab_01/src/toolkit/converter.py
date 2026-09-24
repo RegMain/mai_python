@@ -82,4 +82,4 @@ def convert(from_unit: str, to_unit: str, value: float, config_path: str = "") -
         config_path = Path(__file__).resolve().parent / "converter.json"
     with open(config_path, "r") as config:
         converter = Converter(json.load(config))
-        return converter.convert_from_to(from_unit, to_unit, value)
+        return converter.convert_from_to(from_unit.lower(), to_unit.lower(), value)
