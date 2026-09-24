@@ -26,7 +26,7 @@ class BraceToken(Token):
     is_opening: bool
 
 def get_type(token: str) -> str:
-    if token in ("+", "-", "*", "/"): return "Operator"
+    if token in ("+", "-", "*", "/", "//", "%"): return "Operator"
     if token.isdigit() or token in (".", ","): return "Operand"
     if token in ("(", ")"): return "Brace"
     if token.isspace(): return "Space"
@@ -34,7 +34,7 @@ def get_type(token: str) -> str:
 
 def check_priority(token) -> int:
     match token.value:
-        case "*" | "/": return 2
+        case "*" | "/" | "//" | "%": return 2
         case "+" | "-": return 1 if token.is_binary else 3
     return 0
 
@@ -53,14 +53,16 @@ class Tokenizer:
                             case OperandToken():
                                 result.append(OperatorToken(token, True))
                             case OperatorToken():
-                                result.append(OperatorToken(token, False))
+                                if result[-1].value == "/" and token == "/":
+                                    result[-1].value += "/"
+                                else:
+                                    result.append(OperatorToken(token, False))
                             case BraceToken():
                                 if result[-1].is_opening:
                                     result.append(OperatorToken(token, False))
                                 else:
                                     result.append(OperatorToken(token, True))
                         new_token_flag = True
-
                     else:
                         result.append(OperatorToken(token, False))
                 case "Operand":
@@ -103,7 +105,7 @@ class Validator:
                         )
 
                     if not token.is_binary:
-                        if token.value in ("*", "/"):
+                        if token.value in ("*", "/", "//", "%"):
                             raise ExpressionSyntaxError(
                                 "Two binary operators in a row.\n"
                             )
@@ -150,17 +152,19 @@ class Calculator:
             case "*": return first_operand * second_operand
             case "+": return first_operand + second_operand
             case "-": return first_operand - second_operand
-            case "/":
+            case "/" | "//" | "%":
                 if second_operand:
-                    if type(first_operand) == int and type(second_operand) == int and first_operand % second_operand == 0:
-                        return first_operand // second_operand
-                    else:
-                        return first_operand / second_operand
+                    match operator.value:
+                        case "/": return first_operand / second_operand
+                        case "//": return first_operand // second_operand
+                        case "%": return first_operand % second_operand
                 else:
                     raise DivisionByZeroError(
-                        "Division by zero is in given firmula.\n"
+                        "Division by zero is in given formula.\n"
                     )
-        return -1
+        raise InvalidCharacterError(
+            "Given operator is unknown."
+        )
 
     def tokens_to_prn(self, tokens: list) -> list:
         result: list = []
