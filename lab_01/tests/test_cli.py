@@ -11,13 +11,15 @@ def test_cli_exitcode_0(capsys, monkeypatch):
     output = capsys.readouterr().out.lower()
     assert "4" in output
 
+
 def test_cli_exitcode_2(capsys, monkeypatch):
     monkeypatch.setattr("sys.argv", ["toolkit", "calc", "3 / 0"])
     with pytest.raises(SystemExit) as return_code:
         main()
 
     assert return_code.value.code == 2
-    
+
+
 def test_cli_help(capsys, monkeypatch):
     monkeypatch.setattr("sys.argv", ["toolkit", "--help"])
     with pytest.raises(SystemExit) as return_code:

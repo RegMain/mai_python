@@ -9,38 +9,94 @@ from toolkit.errors import (
 
 
 class Token:
+    """
+    Basic class for all tokens.
+    """
+
     pass
+
 
 @dataclass
 class OperandToken(Token):
+    """
+    Class for operands (numbers: integers and floating point).
+    """
+
     value: str
     is_float: bool
 
+
 @dataclass
 class OperatorToken(Token):
+    """
+    Class for operators.
+    """
+
     value: str
     is_binary: bool
 
+
 @dataclass
 class BraceToken(Token):
+    """
+    Class for braces.
+    """
+
     is_opening: bool
 
+
 def get_type(token: str) -> str:
-    if token in ("+", "-", "*", "/", "//", "%"): return "Operator"
-    if token.isdigit() or token in (".", ","): return "Operand"
-    if token in ("(", ")"): return "Brace"
-    if token.isspace(): return "Space"
+    """
+    Returns type of token (Operator, Operand, Brace or Unknown).
+
+    args:
+    token: str - some token
+    return:
+    type_of_token: str
+    """
+    if token in ("+", "-", "*", "/", "//", "%"):
+        return "Operator"
+    if token.isdigit() or token in (".", ","):
+        return "Operand"
+    if token in ("(", ")"):
+        return "Brace"
+    if token.isspace():
+        return "Space"
     return "Unknown"
 
+
 def check_priority(token) -> int:
+    """
+    Returns priority of operator or number. Number's and brace's priority
+    is 0.
+
+    args:
+    token: str - some token
+    return:
+    priority_of_token: int
+    """
     match token.value:
-        case "*" | "/" | "//" | "%": return 2
-        case "+" | "-": return 1 if token.is_binary else 3
+        case "*" | "/" | "//" | "%":
+            return 2
+        case "+" | "-":
+            return 1 if token.is_binary else 3
     return 0
 
-class Tokenizer:
 
-    def tokenize(self, expression):
+class Tokenizer:
+    """
+    Class for all functions related to tokenization.
+    """
+
+    def tokenize(self, expression: str) -> list:
+        """
+        Main function to tokenize given string.
+
+        args:
+        expression: str
+        return:
+        tokens: list[OperandToken | BraceToken | OperatorToken]
+        """
         while "  " in expression:
             expression = expression.replace("  ", " ")
         result: list = []
@@ -67,7 +123,9 @@ class Tokenizer:
                         result.append(OperatorToken(token, False))
                 case "Operand":
                     if new_token_flag:
-                        result.append(OperandToken(token.replace(",", "."), token in (",", ".")))
+                        result.append(
+                            OperandToken(token.replace(",", "."), token in (",", "."))
+                        )
                         new_token_flag = False
                     elif isinstance(result[-1], OperandToken):
                         if token in (".", ","):
@@ -82,27 +140,33 @@ class Tokenizer:
                     new_token_flag = True
                     continue
                 case "Unknown":
-                    raise InvalidCharacterError(
-                        f"Unknown character: {token}.\n"
-                    )
+                    raise InvalidCharacterError(f"Unknown character: {token}.\n")
         return result
 
+
 class Validator:
+    """
+    Class for all functions related to validation.
+    """
 
     def validate(self, tokens: list):
+        """
+        Main function to validate tokenized expression.
+
+        args:
+        tokens: list - tokenized expression
+        result:
+        None (or Error)
+        """
         if not tokens:
-            raise EmptyExpressionError(
-                "Given expression is empty.\n"
-            )
+            raise EmptyExpressionError("Given expression is empty.\n")
         brace_cnt: int = 0
         for i in range(len(tokens)):
             token = tokens[i]
             match token:
                 case OperatorToken():
                     if i == len(tokens) - 1:
-                        raise ExpressionSyntaxError(
-                            "No operand for operator.\n"
-                        )
+                        raise ExpressionSyntaxError("No operand for operator.\n")
 
                     if not token.is_binary:
                         if token.value in ("*", "/", "//", "%"):
@@ -110,7 +174,10 @@ class Validator:
                                 "Two binary operators in a row.\n"
                             )
                     else:
-                        if (isinstance(tokens[i + 1], OperatorToken) and tokens[i + 1].is_binary):
+                        if (
+                            isinstance(tokens[i + 1], OperatorToken)
+                            and tokens[i + 1].is_binary
+                        ):
                             raise ExpressionSyntaxError(
                                 "Two binary operators in a row.\n"
                             )
@@ -120,9 +187,7 @@ class Validator:
                             )
                 case OperandToken():
                     if token.is_float and token.value.count(".") > 1:
-                        raise ExpressionSyntaxError(
-                            "Invalid format of number.\n"
-                        )
+                        raise ExpressionSyntaxError("Invalid format of number.\n")
                     if i != 0 and isinstance(tokens[i - 1], OperandToken):
                         raise ExpressionSyntaxError(
                             "No operator between two numbers.\n"
@@ -133,40 +198,64 @@ class Validator:
                     else:
                         brace_cnt -= 1
                         if brace_cnt < 0:
-                            raise ExpressionSyntaxError(
-                                "Braces do not match.\n"
-                            )
-                        if isinstance(tokens[i - 1], OperatorToken) or tokens[i - 1] == BraceToken(True):
-                            raise ExpressionSyntaxError(
-                                "Empty braces were found.\n"
-                            )
+                            raise ExpressionSyntaxError("Braces do not match.\n")
+                        if isinstance(tokens[i - 1], OperatorToken) or tokens[
+                            i - 1
+                        ] == BraceToken(True):
+                            raise ExpressionSyntaxError("Empty braces were found.\n")
 
         if brace_cnt != 0:
-            raise ExpressionSyntaxError(
-                "Braces do not match.\n"
-            )
-class Calculator:
+            raise ExpressionSyntaxError("Braces do not match.\n")
 
-    def perform_operation(self, operator: OperatorToken, first_operand: float, second_operand: float) -> int | float:
+
+class Calculator:
+    """
+    Class to all functions related to calculation. Core of calculator.
+    """
+
+    def perform_operation(
+        self, operator: OperatorToken, first_operand: float, second_operand: float
+    ) -> int | float:
+        """
+        Returns result of first_operand (operator) second_operand.
+
+        args:
+        operator: OperatorToken - operator
+        first_operand: float - some number
+        second_operand: float - some number or nothing
+        result:
+        value: int | float - result of given operation
+        """
         match operator.value:
-            case "*": return first_operand * second_operand
-            case "+": return first_operand + second_operand
-            case "-": return first_operand - second_operand
+            case "*":
+                return first_operand * second_operand
+            case "+":
+                return first_operand + second_operand
+            case "-":
+                return first_operand - second_operand
             case "/" | "//" | "%":
                 if second_operand:
                     match operator.value:
-                        case "/": return first_operand / second_operand
-                        case "//": return first_operand // second_operand
-                        case "%": return first_operand % second_operand
+                        case "/":
+                            return first_operand / second_operand
+                        case "//":
+                            return first_operand // second_operand
+                        case "%":
+                            return first_operand % second_operand
                 else:
-                    raise DivisionByZeroError(
-                        "Division by zero is in given formula.\n"
-                    )
-        raise InvalidCharacterError(
-            "Given operator is unknown."
-        )
+                    raise DivisionByZeroError("Division by zero is in given formula.\n")
+        raise InvalidCharacterError("Given operator is unknown.")
 
     def tokens_to_prn(self, tokens: list) -> list:
+        """
+        Shunting yard (Dijkstra's) algorithm to change infix form to postfix
+        (Polish Reverse Notation).
+
+        args:
+        tokens: list[OperandToken | BraceToken | OperatorToken] - tokenized expression
+        result:
+        tokens_in_prn: list[OperandToken | OperatorToken] - expression in postfix form
+        """
         result: list = []
         stack: list = []
         for token in tokens:
@@ -174,9 +263,17 @@ class Calculator:
                 case OperandToken():
                     result.append(token)
                 case OperatorToken():
-                    while stack and isinstance(stack[-1], OperatorToken) and \
-                    (check_priority(stack[-1]) > check_priority(token) or \
-                        (token.is_binary and check_priority(stack[-1]) == check_priority(token))):
+                    while (
+                        stack
+                        and isinstance(stack[-1], OperatorToken)
+                        and (
+                            check_priority(stack[-1]) > check_priority(token)
+                            or (
+                                token.is_binary
+                                and check_priority(stack[-1]) == check_priority(token)
+                            )
+                        )
+                    ):
                         result.append(stack.pop())
                     stack.append(token)
                 case BraceToken():
@@ -193,6 +290,14 @@ class Calculator:
         return result
 
     def calculate_prn(self, formula: list) -> int | float:
+        """
+        Returns result of expression in postfix form (Polish Reverse Notation).
+
+        args:
+        formula: list[OperandToken | OperatorToken] - tokenized expression in postfix form
+        result:
+        value: int | float - some result
+        """
         stack: list = []
         for token in formula:
             if isinstance(token, OperandToken):
@@ -202,16 +307,37 @@ class Calculator:
                 first_operand: int | float = 0
                 if token.is_binary:
                     first_operand = stack.pop()
-                stack.append(self.perform_operation(token, first_operand, second_operand))
+                stack.append(
+                    self.perform_operation(token, first_operand, second_operand)
+                )
 
         if len(stack) == 1:
             return stack.pop()
-        raise ExpressionSyntaxError("Something went wrong while calculating the expression.\n")
+        raise ExpressionSyntaxError(
+            "Something went wrong while calculating the expression.\n"
+        )
 
     def calculate_expression(self, tokens: list) -> int | float:
+        """
+        Returns result of expression (using calculate_prn() and tokens_to_prn() functions)
+
+        args:
+        tokens: list[OperandToken | BraceToken | OperatorToken] - tokenized expression
+        return:
+        value: int | float - some value
+        """
         return self.calculate_prn(self.tokens_to_prn(tokens))
 
+
 def calculate(expression: str) -> int | float:
+    """
+    Main function of calculator.
+
+    args:
+    expression: str - some expression
+    return:
+    value: int | float - result of given expression
+    """
     tokenizer = Tokenizer()
     validator = Validator()
     calculator = Calculator()
