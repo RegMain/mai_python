@@ -186,7 +186,7 @@ class Validator:
                                 "No second operand for binary operator.\n"
                             )
                 case OperandToken():
-                    if token.is_float and token.value.count(".") > 1:
+                    if token.is_float and token.value.count(".") > 1 or token.value == ".":
                         raise ExpressionSyntaxError("Invalid format of number.\n")
                     if i != 0 and isinstance(tokens[i - 1], OperandToken):
                         raise ExpressionSyntaxError(
