@@ -30,6 +30,11 @@ def main():
     parser_convert.add_argument("--from_unit", type=str)
     parser_convert.add_argument("--to_unit", type=str)
     parser_convert.add_argument("--config", type=str)
+
+    # argparse thinks that "-31" is flag. So we need this thing:
+    for i in range(1, len(sys.argv)):
+        if sys.argv[i][0] == "-" and sys.argv[i] not in ("-h", "--help"):
+            sys.argv[i] = " " + sys.argv[i]
     args = parser.parse_args()
     try:
         match args.command:
